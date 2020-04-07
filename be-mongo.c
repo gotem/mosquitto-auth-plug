@@ -235,7 +235,16 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
 	bson_t query;
 
 	bson_init(&query);
-	bson_append_utf8(&query, handle->user_username_prop, -1, username, -1);
+	if(strcmp(conf->user_username_prop,"_id")==0)
+	{                                                                                                    
+					bson_oid_t oid;
+					bson_oid_init_from_string(&oid,username);
+					bson_append_oid(&query,conf->user_username_prop, -1,&oid);
+	}
+	else
+	{
+					bson_append_utf8 (&query, conf->user_username_prop, -1, username, -1);
+	}
 
 	collection = mongoc_client_get_collection(handle->client, handle->database, handle->user_coll);
 

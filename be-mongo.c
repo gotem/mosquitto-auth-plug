@@ -127,7 +127,16 @@ int be_mongo_getuser(void *handle, const char *username, const char *password, c
 
 	bson_init (&query);
 
-	bson_append_utf8 (&query, conf->user_username_prop, -1, username, -1);
+	if(strcmp(conf->user_username_prop,"_id")==0)
+	{
+					bson_oid_t oid;
+					bson_oid_init_from_string(&oid,username);
+					bson_append_oid(&query,conf->user_username_prop, -1,&oid);
+	}
+	else
+	{
+					bson_append_utf8 (&query, conf->user_username_prop, -1, username, -1);
+	}
 
 	collection = mongoc_client_get_collection (conf->client, conf->database, conf->user_coll);
 	cursor = mongoc_collection_find_with_opts(collection, &query, NULL, NULL);
@@ -235,16 +244,7 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
 	bson_t query;
 
 	bson_init(&query);
-	if(strcmp(conf->user_username_prop,"_id")==0)
-	{                                                                                                    
-					bson_oid_t oid;
-					bson_oid_init_from_string(&oid,username);
-					bson_append_oid(&query,conf->user_username_prop, -1,&oid);
-	}
-	else
-	{
-					bson_append_utf8 (&query, conf->user_username_prop, -1, username, -1);
-	}
+	bson_append_utf8(&query, handle->user_username_prop, -1, username, -1);
 
 	collection = mongoc_client_get_collection(handle->client, handle->database, handle->user_coll);
 

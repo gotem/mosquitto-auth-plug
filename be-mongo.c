@@ -54,7 +54,7 @@ void *be_mongo_init()
 	conf->topiclist_topics_prop = strdup(be_mongo_get_option("mongo_topiclist_topics_prop", "mongo_location_topic", "topics"));
 	conf->send_oid = false;
 	const char * send_oid = be_mongo_get_option("mongo_user_send_oid", NULL, "no");
-	if(send_oid =! NULL && strcmp(send_oid,"yes")==0)
+	if(send_oid != NULL && strcmp(send_oid,"yes")==0)
 		conf->send_oid = true;
 	mongoc_init();
 	mongoc_uri_t *uri = be_mongo_new_uri_from_options();

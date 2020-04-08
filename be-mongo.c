@@ -29,6 +29,7 @@ struct mongo_backend {
 	char *user_topiclist_fk_prop;
 	char *topiclist_key_prop;
 	char *topiclist_topics_prop;
+	bool send_oid;
 };
 
 const char *be_mongo_get_option(const char *opt_name, const char *dep_opt_name, const char *default_val);
@@ -51,7 +52,10 @@ void *be_mongo_init()
 	conf->user_topiclist_fk_prop = strdup(be_mongo_get_option("mongo_user_topiclist_fk_prop", "mongo_location_topic", "topics"));
 	conf->topiclist_key_prop = strdup(be_mongo_get_option("mongo_topiclist_key_prop", "mongo_location_superuser", "_id"));
 	conf->topiclist_topics_prop = strdup(be_mongo_get_option("mongo_topiclist_topics_prop", "mongo_location_topic", "topics"));
-
+	conf->send_oid = false;
+	const char * send_oid = be_mongo_get_option("mongo_user_send_oid", NULL, "no");
+	if(send_oid =! NULL && strcmp(send_oid,"yes")==0)
+		conf->send_oid = true;
 	mongoc_init();
 	mongoc_uri_t *uri = be_mongo_new_uri_from_options();
 	if (!uri) {
@@ -127,7 +131,7 @@ int be_mongo_getuser(void *handle, const char *username, const char *password, c
 
 	bson_init (&query);
 
-	if(strcmp(conf->user_username_prop,"_id")==0)
+	if(conf->send_oid)
 	{
 					bson_oid_t oid;
 					bson_oid_init_from_string(&oid,username);
